@@ -1,14 +1,13 @@
-const { postLogin, postRefresh } = require("../services/auth.service");
-const { createSessionCookie, removeSessionCookie } = require("../utilities/cookie.utilities");
+import { postLogin } from "../services/auth.service.js";
+import { createSessionCookie, removeSessionCookie } from "../utilities/cookie.utilities.js";
 
-exports.login = (req, res) => {
+const login = (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
     postLogin(username, password)
         .then((data) => {
-            const token = data.access;
-            const refresh = data.refresh;
-            createSessionCookie(res, token, refresh);
+            const token = data.access_token;
+            createSessionCookie(res, token);
             res.send({
                 message: "Inicio de sesión exitoso",
             });
@@ -20,33 +19,12 @@ exports.login = (req, res) => {
             });
         });
 }
-exports.refreshToken = (req, res) => {
-    const refreshCookie = req.cookies.refresh;
-    if (!refreshCookie) {
-        return res.status(401).send({
-            message: "No refresh token found",
-        });
-    }
-    console.log("Refresh token: ", refreshCookie);
-    postRefresh(refreshCookie)
-        .then((data) => {
-            const token = data.access;
-            console.log("New token: ", token);
-            createSessionCookie(res, token, null);
-            res.send({
-                message: "Token refreshed",
-            });
-        })
-        .catch((error) => {
-            console.log(error);
-            res.status(401).send({
-                message: "Invalid refresh token",
-            });
-        });
-}
-exports.logout = (req, res) => {
+
+const logout = (req, res) => {
     removeSessionCookie(res);
     res.send({
-        message: "Logout successful",
+        message: "Cierre de sesión exitoso",
     });
 }
+
+export { login, logout };
